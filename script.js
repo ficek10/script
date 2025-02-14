@@ -14,25 +14,33 @@ const employees = {
 };
 
 const shiftTypes = {
-    'R': { name: 'Ranní', color: '', hours: 7.5 },
-    'O': { name: 'Odpolední', color: '', hours: 7.5 },
-    'L': { name: 'Lékař', color: '', hours: 7.5 },
-    'IP': { name: 'Individuální péče', color: '', hours: 7.5 },
-    'RO': { name: 'Ranní+Odpolední', color: '', hours: 11.5 },
-    'NSK': { name: 'Noční služba staniční', color: 'rgb(173,216,230)', hours: 12, nightStart: 19, nightEnd: 7 },
-    'CH': { name: 'Chráněné bydlení', color: '', hours: 7.5 },
-    'V': { name: 'Volno', color: '', hours: 0 },
-    'N': { name: 'Noční', color: 'rgb(211,211,211)', hours: 9, nightStart: 21, nightEnd: 6 },
-    'S': { name: 'Služba', color: '', hours: 7.5 },
-    'D': { name: 'Dovolená', color: 'rgb(144,238,144)', hours: 7.5 },
-    'IV': { name: 'Individuální výchova', color: '', hours: 7.5 },
-    'ŠK': { name: 'Školení', color: '', hours: 7.5 }
+    'R': { name: 'Ranní', color: 'rgb(173,216,230)', hours: 7.5 },
+    'O': { name: 'Odpolední', color: 'rgb(144,238,144)', hours: 7.5 },
+    'L': { name: 'Lékař', color: 'rgb(255,182,193)', hours: 7.5 },
+    'IP': { name: 'Individuální péče', color: 'rgb(255,218,185)', hours: 7.5 },
+    'RO': { name: 'Ranní+Odpolední', color: 'rgb(221,160,221)', hours: 11.5 },
+    'NSK': { name: 'Noční služba staniční', color: 'rgb(255,255,153)', 
+           hours: 12, nightStart: 19, nightEnd: 7 },
+    'CH': { name: 'Chráněné bydlení', color: 'rgb(255,160,122)', hours: 7.5 },
+    'V': { name: 'Volno', color: 'rgb(211,211,211)', hours: 0 },
+    'N': { name: 'Noční', color: 'rgb(176,196,222)', 
+           hours: 9, nightStart: 21, nightEnd: 6 },
+    'S': { name: 'Služba', color: 'rgb(152,251,152)', hours: 7.5 },
+    'D': { name: 'Dovolená', color: 'rgb(240,230,140)', hours: 7.5 },
+    'IV': { name: 'Individuální výchova', color: 'rgb(230,230,250)', hours: 7.5 },
+    'ŠK': { name: 'Školení', color: 'rgb(255,228,196)', hours: 7.5 }
+};
+
+// Barvy pro export do Wordu
+const exportColors = {
+    'D': 'rgb(144,238,144)',  // zelená
+    'N': 'rgb(211,211,211)',  // šedá
+    'NSK': 'rgb(173,216,230)' // modrá
 };
 
 let shifts = {};
 let currentMonth = new Date().getMonth() + 1;
 let currentYear = new Date().getFullYear();
-
 // Inicializace aplikace
 document.addEventListener('DOMContentLoaded', () => {
     // Načtení uložených dat
@@ -138,6 +146,7 @@ function createShiftTable() {
     const tbody = table.querySelector('tbody');
     tbody.innerHTML = '';
 
+    // Vytvoření řádků pro každého zaměstnance
     Object.keys(employees).forEach(employee => {
         const tr = document.createElement('tr');
         const tdName = document.createElement('td');
@@ -149,7 +158,6 @@ function createShiftTable() {
 
     updateTable();
 }
-
 // Aktualizace tabulky
 function updateTable() {
     const table = document.getElementById('shiftTable');
@@ -205,9 +213,7 @@ function updateTable() {
             const currentShift = shifts[`${employee}-${i}`];
             if (currentShift) {
                 select.value = currentShift;
-                if (shiftTypes[currentShift].color) {
-                    select.style.backgroundColor = shiftTypes[currentShift].color;
-                }
+                select.style.backgroundColor = shiftTypes[currentShift].color;
             }
 
             // Event listener pro změnu služby
@@ -215,11 +221,7 @@ function updateTable() {
                 const shift = e.target.value;
                 if (shift) {
                     shifts[`${employee}-${i}`] = shift;
-                    if (shiftTypes[shift].color) {
-                        e.target.style.backgroundColor = shiftTypes[shift].color;
-                    } else {
-                        e.target.style.backgroundColor = '';
-                    }
+                    e.target.style.backgroundColor = shiftTypes[shift].color;
                 } else {
                     delete shifts[`${employee}-${i}`];
                     e.target.style.backgroundColor = '';
@@ -245,8 +247,8 @@ function isWeekend(day) {
 // Vrací počet hodin, které se počítají do víkendu pro páteční noční
 function getFridayHours(shift) {
     if (!shift) return 0;
-    if (shift === 'N') return 6;  // z 9 hodin jde 6 do soboty
-    if (shift === 'NSK') return 7;  // z 12 hodin jde 7 do soboty
+    if (shift === 'N') return 6;  // z pátečních 9 hodin jde 6 do soboty
+    if (shift === 'NSK') return 7;  // z pátečních 12 hodin jde 7 do soboty
     return 0;
 }
 
@@ -268,7 +270,6 @@ function getWorkDays() {
     }
     return workDays;
 }
-
 // Kontrola pravidel
 function checkRules() {
     const alerts = [];
@@ -340,13 +341,7 @@ function checkRules() {
             // Kontrola CH služeb v pátek
             for (let day = 1; day <= daysInMonth; day++) {
                 if (new Date(currentYear, currentMonth - 1, day).getDay() === 5) { // Pátek
-                    if (shifts[`${name}-${day}`] !==
-    };
-    localStorage.setItem('generalRules', JSON.stringify(generalRules));
-
-    alert('Pravidla byla úspěšně uložena');
-}
-if (shifts[`${name}-${day}`] !== 'CH') {
+                    if (shifts[`${name}-${day}`] !== 'CH') {
                         alerts.push(`Vaněčková: Chybí CH služba v pátek (${day})`);
                     }
                 }
@@ -406,7 +401,6 @@ function checkOccupancy() {
 
     showAlerts(alerts);
 }
-
 // Výpočet statistik
 function calculateStats() {
     const stats = {};
@@ -426,27 +420,23 @@ function calculateStats() {
             const shift = shifts[`${name}-${day}`];
             if (shift && shiftTypes[shift]) {
                 shiftCounts[shift]++;
-                
-                // Celkový počet hodin
-                let regularHours = shiftTypes[shift].hours;
-                totalHours += regularHours;
+                let hours = shiftTypes[shift].hours;
 
-                // Výpočet víkendových hodin
-                if (isWeekend(day)) {
-                    weekendHours += regularHours;
-                } else if (shift === 'N' || shift === 'NSK') {
-                    // Pro páteční noční přičteme hodiny do soboty
+                // Speciální výpočet pro noční směny o víkendu
+                if ((shift === 'N' || shift === 'NSK') && isWeekend(day)) {
                     const date = new Date(currentYear, currentMonth - 1, day);
                     if (date.getDay() === 5) { // Pátek
                         weekendHours += getFridayHours(shift);
+                    } else if (date.getDay() === 0) { // Neděle
+                        weekendHours += getSundayHours(shift);
+                    } else {
+                        weekendHours += hours;
                     }
+                } else if (isWeekend(day)) {
+                    weekendHours += hours;
                 }
 
-                // Pro nedělní noční započítáme jen hodiny do půlnoci
-                if ((shift === 'N' || shift === 'NSK') && 
-                    new Date(currentYear, currentMonth - 1, day).getDay() === 0) {
-                    weekendHours = weekendHours - regularHours + getSundayHours(shift);
-                }
+                totalHours += hours;
             }
         }
 
@@ -528,13 +518,12 @@ function createLegend() {
         const div = document.createElement('div');
         div.className = 'flex items-center';
         div.innerHTML = `
-            <div class="w-6 h-6 rounded mr-2" style="background-color: ${color || 'white'}"></div>
+            <div class="w-6 h-6 rounded mr-2" style="background-color: ${color}"></div>
             <span>${code} - ${name} (${hours}h)</span>
         `;
         legend.appendChild(div);
     });
 }
-
 // Export do Wordu
 function exportToWord() {
     const header = `
@@ -548,10 +537,10 @@ function exportToWord() {
                 @page {
                     size: landscape;
                     mso-page-orientation: landscape;
+                    margin: 1cm;
                 }
                 body {
                     font-family: Tahoma;
-                    margin: 1cm;
                 }
                 h1 {
                     text-align: center;
@@ -566,8 +555,6 @@ function exportToWord() {
                     border: 1px solid black;
                     padding: 4px;
                     text-align: center;
-                    overflow: hidden;
-                    white-space: nowrap;
                 }
                 th {
                     background-color: #f0f0f0;
@@ -575,11 +562,6 @@ function exportToWord() {
                 }
                 .weekend {
                     background-color: #fffde7;
-                }
-                .employee-name {
-                    text-align: left;
-                    padding-left: 8px;
-                    width: 150px;
                 }
             </style>
         </head>
@@ -590,24 +572,24 @@ function exportToWord() {
         <h1>${new Date(currentYear, currentMonth - 1).toLocaleString('cs', { month: 'long' })} ${currentYear}</h1>
         <table>
             <tr>
-                <th class="employee-name">Jméno</th>
+                <th>Jméno</th>
     `;
 
     const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
 
-    // Přidání hlavičky s dny
+    // Hlavička s dny
     for (let i = 1; i <= daysInMonth; i++) {
         content += `<th class="${isWeekend(i) ? 'weekend' : ''}">${i}</th>`;
     }
     content += '</tr>';
 
-    // Přidání dat zaměstnanců
+    // Data zaměstnanců - použití exportColors pro vybrané služby
     Object.keys(employees).forEach(employee => {
-        content += `<tr><td class="employee-name">${employee}</td>`;
+        content += `<tr><td>${employee}</td>`;
         for (let day = 1; day <= daysInMonth; day++) {
             const shift = shifts[`${employee}-${day}`] || '';
-            const style = shift && shiftTypes[shift].color ? 
-                `background-color: ${shiftTypes[shift].color}` : '';
+            const style = shift && exportColors[shift] ? 
+                `background-color: ${exportColors[shift]}` : '';
             content += `<td style="${style}">${shift}</td>`;
         }
         content += '</tr>';
@@ -615,10 +597,7 @@ function exportToWord() {
 
     content += '</table>';
 
-    const footer = `
-        </body>
-        </html>
-    `;
+    const footer = `</body></html>`;
 
     const blob = new Blob([header + content + footer], { type: 'application/msword' });
     const url = URL.createObjectURL(blob);
@@ -631,7 +610,7 @@ function exportToWord() {
     URL.revokeObjectURL(url);
 }
 
-// Funkce pro správu pravidel (pouze pro rules.html)
+// Funkce pro generování karet s pravidly (pouze pro rules.html)
 function generateEmployeeCards() {
     const container = document.querySelector('.grid');
     if (!container) return;
