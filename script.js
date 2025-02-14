@@ -14,28 +14,26 @@ const employees = {
 };
 
 const shiftTypes = {
-    'R': { name: 'Ranní', color: 'transparent', hours: 7.5 },
-    'O': { name: 'Odpolední', color: 'transparent', hours: 7.5 },
-    'L': { name: 'Lékař', color: 'transparent', hours: 7.5 },
-    'IP': { name: 'Individuální péče', color: 'transparent', hours: 7.5 },
-    'RO': { name: 'Ranní+Odpolední', color: 'transparent', hours: 11.5 },
-    'NSK': { name: 'Noční služba staniční', color: 'rgb(0,0,255)',
-        hours: 12, nightStart: 19, nightEnd: 7 },
-    'CH': { name: 'Chráněné bydlení', color: 'transparent', hours: 7.5 },
-    'V': { name: 'Volno', color: 'transparent', hours: 0 },
-    'N': { name: 'Noční', color: 'rgb(128,128,128)', 
-        hours: 9, nightStart: 21, nightEnd: 6 },
-    'S': { name: 'Služba', color: 'transparent', hours: 7.5 },
-    'D': { name: 'Dovolená', color: 'rgb(0,255,0)', hours: 7.5 },
-    'IV': { name: 'Individuální výchova', color: 'transparent', hours: 7.5 },
-    'ŠK': { name: 'Školení', color: 'transparent', hours: 7.5 }
+    'R': { name: 'Ranní', color: '', hours: 7.5 },
+    'O': { name: 'Odpolední', color: '', hours: 7.5 },
+    'L': { name: 'Lékař', color: '', hours: 7.5 },
+    'IP': { name: 'Individuální péče', color: '', hours: 7.5 },
+    'RO': { name: 'Ranní+Odpolední', color: '', hours: 11.5 },
+    'NSK': { name: 'Noční služba staniční', color: 'rgb(173,216,230)', hours: 12, nightStart: 19, nightEnd: 7 },
+    'CH': { name: 'Chráněné bydlení', color: '', hours: 7.5 },
+    'V': { name: 'Volno', color: '', hours: 0 },
+    'N': { name: 'Noční', color: 'rgb(211,211,211)', hours: 9, nightStart: 21, nightEnd: 6 },
+    'S': { name: 'Služba', color: '', hours: 7.5 },
+    'D': { name: 'Dovolená', color: 'rgb(144,238,144)', hours: 7.5 },
+    'IV': { name: 'Individuální výchova', color: '', hours: 7.5 },
+    'ŠK': { name: 'Školení', color: '', hours: 7.5 }
 };
 
 let shifts = {};
 let currentMonth = new Date().getMonth() + 1;
 let currentYear = new Date().getFullYear();
 
-// Inicializace aplikace - rozdělení pro různé stránky
+// Inicializace aplikace
 document.addEventListener('DOMContentLoaded', () => {
     // Načtení uložených dat
     loadSavedData();
@@ -140,7 +138,6 @@ function createShiftTable() {
     const tbody = table.querySelector('tbody');
     tbody.innerHTML = '';
 
-    // Vytvoření řádků pro každého zaměstnance
     Object.keys(employees).forEach(employee => {
         const tr = document.createElement('tr');
         const tdName = document.createElement('td');
@@ -208,7 +205,9 @@ function updateTable() {
             const currentShift = shifts[`${employee}-${i}`];
             if (currentShift) {
                 select.value = currentShift;
-                select.style.backgroundColor = shiftTypes[currentShift].color;
+                if (shiftTypes[currentShift].color) {
+                    select.style.backgroundColor = shiftTypes[currentShift].color;
+                }
             }
 
             // Event listener pro změnu služby
@@ -216,7 +215,11 @@ function updateTable() {
                 const shift = e.target.value;
                 if (shift) {
                     shifts[`${employee}-${i}`] = shift;
-                    e.target.style.backgroundColor = shiftTypes[shift].color;
+                    if (shiftTypes[shift].color) {
+                        e.target.style.backgroundColor = shiftTypes[shift].color;
+                    } else {
+                        e.target.style.backgroundColor = '';
+                    }
                 } else {
                     delete shifts[`${employee}-${i}`];
                     e.target.style.backgroundColor = '';
@@ -239,21 +242,19 @@ function isWeekend(day) {
     return date.getDay() === 0 || date.getDay() === 6;
 }
 
-function getFridayNightHours(shift) {
-    if (shift === 'N') {
-        return 3; // Pátek N: 3h pátek + 6h sobota
-    } else if (shift === 'NSK') {
-        return 5; // Pátek NSK: 5h pátek + 7h sobota 
-    }
+// Vrací počet hodin, které se počítají do víkendu pro páteční noční
+function getFridayHours(shift) {
+    if (!shift) return 0;
+    if (shift === 'N') return 6;  // z 9 hodin jde 6 do soboty
+    if (shift === 'NSK') return 7;  // z 12 hodin jde 7 do soboty
     return 0;
 }
 
-function getSundayNightHours(shift) {
-    if (shift === 'N') {
-        return 3; // Neděle N: 3h neděle + 6h pondělí
-    } else if (shift === 'NSK') {
-        return 5; // Neděle NSK: 5h neděle + 7h pondělí
-    }
+// Vrací počet hodin, které se počítají do víkendu pro nedělní noční
+function getSundayHours(shift) {
+    if (!shift) return 0;
+    if (shift === 'N') return 3;  // z 9 hodin jde 3 do neděle
+    if (shift === 'NSK') return 5;  // z 12 hodin jde 5 do neděle
     return 0;
 }
 
@@ -339,7 +340,13 @@ function checkRules() {
             // Kontrola CH služeb v pátek
             for (let day = 1; day <= daysInMonth; day++) {
                 if (new Date(currentYear, currentMonth - 1, day).getDay() === 5) { // Pátek
-                    if (shifts[`${name}-${day}`] !== 'CH') {
+                    if (shifts[`${name}-${day}`] !==
+    };
+    localStorage.setItem('generalRules', JSON.stringify(generalRules));
+
+    alert('Pravidla byla úspěšně uložena');
+}
+if (shifts[`${name}-${day}`] !== 'CH') {
                         alerts.push(`Vaněčková: Chybí CH služba v pátek (${day})`);
                     }
                 }
@@ -349,14 +356,12 @@ function checkRules() {
             Object.keys(employees).forEach(otherName => {
                 if (otherName !== name) {
                     for (let day = 1; day <= daysInMonth; day++) {
-                      const shift = shifts[`${otherName}-${day}`];
-if (shift === 'NSK' || shift === 'CH') {
-    alerts.push(`${otherName}: Nesmí mít ${shift} službu (pouze pro Vaněčkovou)`);
-}
-            }
-        }
-    });
-}
+                        const shift = shifts[`${otherName}-${day}`];
+                        if (shift === 'NSK' || shift === 'CH') {
+                            alerts.push(`${otherName}: Nesmí mít ${shift} službu (pouze pro Vaněčkovou)`);
+                        }
+                    }
+                }
             });
         }
     });
@@ -421,21 +426,26 @@ function calculateStats() {
             const shift = shifts[`${name}-${day}`];
             if (shift && shiftTypes[shift]) {
                 shiftCounts[shift]++;
-                let hours = shiftTypes[shift].hours;
+                
+                // Celkový počet hodin
+                let regularHours = shiftTypes[shift].hours;
+                totalHours += regularHours;
 
-                // Speciální výpočet pro noční směny o víkendu
-                if ((shift === 'N' || shift === 'NSK') && isWeekend(day)) {
+                // Výpočet víkendových hodin
+                if (isWeekend(day)) {
+                    weekendHours += regularHours;
+                } else if (shift === 'N' || shift === 'NSK') {
+                    // Pro páteční noční přičteme hodiny do soboty
                     const date = new Date(currentYear, currentMonth - 1, day);
                     if (date.getDay() === 5) { // Pátek
-                        hours = getFridayNightHours(shift);
-                    } else if (date.getDay() === 0) { // Neděle
-                        hours = getSundayNightHours(shift);
+                        weekendHours += getFridayHours(shift);
                     }
                 }
 
-                totalHours += hours;
-                if (isWeekend(day)) {
-                    weekendHours += hours;
+                // Pro nedělní noční započítáme jen hodiny do půlnoci
+                if ((shift === 'N' || shift === 'NSK') && 
+                    new Date(currentYear, currentMonth - 1, day).getDay() === 0) {
+                    weekendHours = weekendHours - regularHours + getSundayHours(shift);
                 }
             }
         }
@@ -518,7 +528,7 @@ function createLegend() {
         const div = document.createElement('div');
         div.className = 'flex items-center';
         div.innerHTML = `
-            <div class="w-6 h-6 rounded mr-2" style="background-color: ${color}"></div>
+            <div class="w-6 h-6 rounded mr-2" style="background-color: ${color || 'white'}"></div>
             <span>${code} - ${name} (${hours}h)</span>
         `;
         legend.appendChild(div);
@@ -527,86 +537,101 @@ function createLegend() {
 
 // Export do Wordu
 function exportToWord() {
-  const header = `
-    <html xmlns:o='urn:schemas-microsoft-com:office:office' 
-          xmlns:w='urn:schemas-microsoft-com:office:word' 
-          xmlns='http://www.w3.org/TR/REC-html40'>
-    <head>
-      <meta charset='utf-8'>
-      <title>Rozpis služeb</title>
-      <style>
-        table {
-          border-collapse: collapse;
-          width: 100%;
-        }
-        td, th {
-          border: 1px solid black;
-          padding: 8px;
-          text-align: center;
-          vertical-align: middle;
-          font-family: Tahoma, sans-serif;
-          font-size: 11pt;
-        }
-        th {
-          background-color: #DDDDDD;
-          font-weight: bold;
-        }
-        @page {
-          size: landscape;
-          margin: 0.5in;
-        }
-      </style>
-    </head>
-    <body>
-  `;
+    const header = `
+        <html xmlns:o='urn:schemas-microsoft-com:office:office' 
+              xmlns:w='urn:schemas-microsoft-com:office:word' 
+              xmlns='http://www.w3.org/TR/REC-html40'>
+        <head>
+            <meta charset='utf-8'>
+            <title>Rozpis služeb</title>
+            <style>
+                @page {
+                    size: landscape;
+                    mso-page-orientation: landscape;
+                }
+                body {
+                    font-family: Tahoma;
+                    margin: 1cm;
+                }
+                h1 {
+                    text-align: center;
+                    margin-bottom: 20px;
+                }
+                table {
+                    border-collapse: collapse;
+                    width: 100%;
+                    table-layout: fixed;
+                }
+                th, td {
+                    border: 1px solid black;
+                    padding: 4px;
+                    text-align: center;
+                    overflow: hidden;
+                    white-space: nowrap;
+                }
+                th {
+                    background-color: #f0f0f0;
+                    font-weight: bold;
+                }
+                .weekend {
+                    background-color: #fffde7;
+                }
+                .employee-name {
+                    text-align: left;
+                    padding-left: 8px;
+                    width: 150px;
+                }
+            </style>
+        </head>
+        <body>
+    `;
 
-  let content = `<table>`;
+    let content = `
+        <h1>${new Date(currentYear, currentMonth - 1).toLocaleString('cs', { month: 'long' })} ${currentYear}</h1>
+        <table>
+            <tr>
+                <th class="employee-name">Jméno</th>
+    `;
 
-  // Přidání hlavičky tabulky
-  content += `
-    <tr>
-      <th></th>
-      <th colspan="31">${monthName(currentMonth)} ${currentYear}</th>
-    </tr>
-    <tr>
-      <th>Zaměstnanec</th>
-      ${[...Array(31)].map((_, i) => `<th>${i + 1}</th>`).join('')}
-    </tr>
-  `;
+    const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
 
-  // Přidání řádků pro každého zaměstnance
-  Object.keys(employees).forEach(name => {
-    content += `<tr><td>${name}</td>`;
-    for (let day = 1; day <= 31; day++) {
-      const shift = shifts[`${name}-${day}`] || '';
-      const style = shift ? `background-color: ${shiftTypes[shift].color}` : '';
-      content += `<td style="${style}">${shift}</td>`;
+    // Přidání hlavičky s dny
+    for (let i = 1; i <= daysInMonth; i++) {
+        content += `<th class="${isWeekend(i) ? 'weekend' : ''}">${i}</th>`;
     }
     content += '</tr>';
-  });
 
-  content += '</table>';
+    // Přidání dat zaměstnanců
+    Object.keys(employees).forEach(employee => {
+        content += `<tr><td class="employee-name">${employee}</td>`;
+        for (let day = 1; day <= daysInMonth; day++) {
+            const shift = shifts[`${employee}-${day}`] || '';
+            const style = shift && shiftTypes[shift].color ? 
+                `background-color: ${shiftTypes[shift].color}` : '';
+            content += `<td style="${style}">${shift}</td>`;
+        }
+        content += '</tr>';
+    });
 
-  const footer = `</body></html>`;
-  const sourceHTML = header + content + footer;
+    content += '</table>';
 
-  const source = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(sourceHTML);
-  const fileDownload = document.createElement("a");
-  document.body.appendChild(fileDownload);
-  fileDownload.href = source;
-  fileDownload.download = 'rozpis.doc';
-  fileDownload.click();
-  document.body.removeChild(fileDownload);
+    const footer = `
+        </body>
+        </html>
+    `;
+
+    const blob = new Blob([header + content + footer], { type: 'application/msword' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Rozpis_${currentYear}_${currentMonth}.doc`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
 }
 
-// Pomocná funkce pro získání názvu měsíce
-function monthName(monthNumber) {
-  const date = new Date();
-  date.setMonth(monthNumber - 1);
-  return date.toLocaleString('cs-CZ', { month: 'long' });
-}  
-
-// Funkce pro generování karet s pravidly (pouze pro rules.html)
+// Funkce pro správu pravidel (pouze pro rules.html)
 function generateEmployeeCards() {
     const container = document.querySelector('.grid');
     if (!container) return;
