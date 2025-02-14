@@ -3,7 +3,7 @@ const employees = {
     "Kolářová Hana": { maxNights: 0, maxRO: 4, canNights: false, minFreeWeekends: 2 },
     "Králová Martina": { maxNights: 2, maxRO: 1, canNights: true, minFreeWeekends: 2 },
     "Vaněčková Dana": { maxNights: 0, maxRO: 0, canNights: false, minFreeWeekends: 2, specialRules: true },
-    "Vaňková Vlaďka": { maxNights: 5, maxRO: 4, canNights: true, minFreeWeekends: 2 },
+    "Vaňková Vlaďena": { maxNights: 5, maxRO: 4, canNights: true, minFreeWeekends: 2 },
     "Vrkoslavová Irena": { maxNights: 5, maxRO: 4, canNights: true, minFreeWeekends: 1 },
     "Dianová Kristýna": { maxNights: 5, maxRO: 1, canNights: true, minFreeWeekends: 2 },
     "Dráb David": { maxNights: 5, maxRO: 1, canNights: true, minFreeWeekends: 2 },
@@ -401,7 +401,7 @@ function checkOccupancy() {
 
     showAlerts(alerts);
 }
-// Výpočet statistik
+// kalkulace statistik
 function calculateStats() {
     const stats = {};
     const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
